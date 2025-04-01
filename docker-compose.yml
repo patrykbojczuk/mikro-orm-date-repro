@@ -1,0 +1,42 @@
+services:
+  mariadb:
+    image: mariadb:11
+    ports:
+      - '3309:3306'
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    volumes:
+      - mariadb:/var/lib/mysql
+
+  postgre:
+    image: pgvector/pgvector:pg16
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgre:/var/lib/postgresql/data
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+
+  mssql:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    restart: always
+    ports:
+      - '1433:1433'
+    cap_add:
+      - SYS_PTRACE
+    environment:
+      MSSQL_SA_PASSWORD: Root.Root
+      MSSQL_TELEMETRY_ENABLED: 0
+      ACCEPT_EULA: 1
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P 'Root.Root' -Q 'select 1'
+
+volumes:
+  mariadb:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
+  postgre:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
